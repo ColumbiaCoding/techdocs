@@ -1,0 +1,457 @@
+SPAR Dashboard Technical Documentation
+
+2 TECHNICAL SUMMARY
+
+2.1 SYSTEM ARCHITECTURE
+The SPAR Dashboard is built on a modern, scalable architecture that supports both real-time and batch processing of outage and work management data.
+
+2.2 INFRASTRUCTURE COMPONENTS
+
+2.2.1 Servers
+•	Application Servers (2x)
+  - Primary: Windows Server 2019
+  - Backup: Windows Server 2019
+  - 16 CPU cores, 64GB RAM
+  - Load balanced configuration
+
+•	Database Servers (2x)
+  - Primary: SQL Server 2019 Enterprise
+  - Secondary: SQL Server 2019 Enterprise (Always On Availability Group)
+  - 32 CPU cores, 128GB RAM
+  - SSD Storage with RAID 10
+
+•	Web Servers (2x)
+  - IIS 10.0
+  - Windows Server 2019
+  - 8 CPU cores, 32GB RAM
+  - Load balanced with SSL termination
+
+•	Integration Servers (2x)
+  - Windows Server 2019
+  - 8 CPU cores, 32GB RAM
+  - Message Queue processing
+  - Web Service hosting
+
+2.2.2 Database Architecture
+•	Primary Database (SPAR_DB)
+  - Schema: dbo
+  - Tables:
+    * OutageEvents
+    * CustomerImpact
+    * WorkPlans
+    * CrewAssignments
+    * ResourceAllocation
+    * SystemMetrics
+    * AuditLogs
+  - Stored Procedures:
+    * sp_CalculateCustomerImpact
+    * sp_UpdateWorkPlanStatus
+    * sp_ProcessResourceAllocation
+    * sp_GenerateSystemMetrics
+  - Views:
+    * vw_ActiveOutages
+    * vw_WorkPlanSummary
+    * vw_ResourceUtilization
+  - Indexes:
+    * Clustered indexes on primary keys
+    * Non-clustered indexes on frequently queried columns
+    * Full-text indexes on searchable fields
+
+•	Reporting Database (SPAR_Reporting)
+  - Schema: reporting
+  - Tables:
+    * HistoricalOutages
+    * PerformanceMetrics
+    * UserActivity
+  - Materialized Views:
+    * mv_DailyOutageSummary
+    * mv_WeeklyPerformanceMetrics
+    * mv_MonthlyUserActivity
+
+2.2.3 Application Components
+
+Frontend:
+•	Framework: React.js 18.x
+•	State Management: Redux
+•	UI Components: Material-UI
+•	Charts: D3.js
+•	Maps: Leaflet.js
+•	Build Tool: Webpack
+•	Package Manager: npm
+
+Backend:
+•	Framework: .NET Core 6.0
+•	API: RESTful Web API
+•	Authentication: JWT with OAuth 2.0
+•	Caching: Redis
+•	Message Queue: RabbitMQ
+•	Logging: Serilog
+•	Monitoring: Application Insights
+
+2.2.4 Integration Components
+•	Message Queue System
+  - RabbitMQ 3.9.x
+  - Clustered configuration
+  - Message persistence enabled
+  - Dead letter queues configured
+
+•	Web Services
+  - REST API endpoints
+  - SOAP services for legacy systems
+  - API Gateway for request routing
+  - Rate limiting and throttling
+
+•	External System Integrations
+  - Outage Map System (REST API)
+  - Work Management System (SOAP)
+  - Customer Information System (REST API)
+  - Crew Management System (REST API)
+  - Geographic Information System (REST API)
+
+2.2.5 Security Infrastructure
+•	Authentication
+  - Active Directory integration
+  - Multi-factor authentication
+  - JWT token-based authentication
+  - OAuth 2.0 for external services
+
+•	Authorization
+  - Role-based access control (RBAC)
+  - Claims-based authorization
+  - Resource-level permissions
+  - API key management
+
+•	Data Protection
+  - TLS 1.3 for all communications
+  - Data encryption at rest
+  - Field-level encryption for sensitive data
+  - Key rotation policies
+
+2.2.6 Monitoring and Logging
+•	Application Monitoring
+  - Application Insights
+  - Custom performance counters
+  - Real-time metrics dashboard
+  - Alert configuration
+
+•	Logging
+  - Centralized logging with Serilog
+  - Log levels: Debug, Info, Warning, Error
+  - Log retention: 90 days
+  - Log analysis tools integration
+
+2.2.7 Backup and Recovery
+•	Database Backups
+  - Full backups: Daily
+  - Differential backups: Every 6 hours
+  - Transaction logs: Every 15 minutes
+  - Backup retention: 30 days
+
+•	Application Backups
+  - Configuration backups: Daily
+  - Code repository: Git
+  - Deployment packages: Azure Artifacts
+  - Disaster recovery site: Active-Active
+
+2.2.8 Development and Deployment
+•	Development Environment
+  - Visual Studio 2022
+  - VS Code
+  - Git for version control
+  - Azure DevOps for CI/CD
+
+•	Deployment Pipeline
+  - Automated builds
+  - Unit test automation
+  - Integration test automation
+  - Deployment to staging
+  - Production deployment with approval
+
+•	Quality Assurance
+  - Automated testing
+  - Performance testing
+  - Security scanning
+  - Code quality checks
+
+3 OVERVIEW
+
+3.1 INTRODUCTION
+The SPAR Dashboard is a comprehensive system designed to monitor and display outage information, work plans, and customer impact data. This documentation provides technical details about the system's functionality, data points, and operational requirements. The system operates in two primary modes: Blue Sky Mode for normal operations and Storm Mode for outage events.
+
+3.2 OBJECTIVES
+•	Provide real-time monitoring of outage information and customer impact
+•	Track and display work plan statistics and resource allocation
+•	Monitor and report on hardest hit areas during outage events
+•	Support decision-making during both normal operations and storm events
+•	Enable efficient resource management and crew allocation
+•	Provide drill-down capabilities for detailed analysis
+•	Ensure secure and reliable data integration with multiple systems
+
+3.3 ACRONYMS
+•	ASO: Automatic Service Order
+•	ASP: Automatic Service Provider
+•	CSO: Customer Service Order
+•	DSP: Dispatch
+•	ARR: Arrived
+•	ASN: Assigned
+•	ETR: Estimated Time of Restoration
+•	LSE: Large Service Establishment
+•	FTE: Full-Time Equivalent
+
+4 ASSUMPTIONS
+•	System has continuous access to required data sources
+•	Network connectivity is maintained during normal operations
+•	User authentication and authorization systems are in place
+•	Data refresh intervals are sufficient for operational needs
+•	Backup systems are available for critical components
+•	Users have appropriate training and access levels
+•	Integration systems are operational and accessible
+
+5 TECHNICAL REQUIREMENT
+
+5.1 SUMMARY
+The SPAR Dashboard requires real-time data integration, secure access controls, and robust performance capabilities to support both normal operations and storm events.
+
+5.2 PROCESS FLOW DIAGRAM
+[Process flow diagram to be added]
+
+5.3 PROCESS FLOW DESCRIPTION
+•	Data Collection: Real-time gathering from multiple sources
+•	Data Processing: Calculation of metrics and statistics
+•	Data Presentation: Display through user interface
+•	User Interaction: Filtering and drill-down capabilities
+•	Data Updates: Periodic and real-time refresh cycles
+
+5.4 DEPENDENCIES
+•	External Outage Map System
+•	Work Management System
+•	Customer Information System
+•	Crew Management System
+•	Geographic Information System
+•	Authentication System
+•	Network Infrastructure
+
+5.5 DESIGN CONSTRAINTS
+•	Response time requirements for critical metrics
+•	Concurrent user support limitations
+•	Data refresh rate limitations
+•	Network bandwidth requirements
+•	Storage capacity limitations
+•	Browser compatibility requirements
+
+5.6 DISASTER RECOVERY PROCEDURES
+•	Automatic failover to backup systems
+•	Data recovery procedures
+•	Service restoration protocols
+•	Communication procedures
+•	User notification process
+
+5.7 BACKUP REQUIREMENTS
+•	Daily full system backups
+•	Real-time transaction logging
+•	Configuration backup
+•	User data backup
+•	Integration point backup
+
+5.8 ARCHIVING AND PURGING REQUIREMENTS
+•	Historical data retention policies
+•	Automatic archiving procedures
+•	Data purging schedules
+•	Archive access procedures
+•	Compliance requirements
+
+5.9 DATA SECURITY CONSIDERATIONS
+•	Role-based access control
+•	Data encryption requirements
+•	Audit logging
+•	Secure transmission protocols
+•	Data privacy compliance
+
+6 PROGRAM UNIT DEFINITION
+
+6.1 STORED PROCEDURE SUMMARY
+•	Customer Impact Calculations
+•	Work Plan Statistics Processing
+•	Resource Management Calculations
+•	Data Integration Procedures
+•	Security Validation Procedures
+
+7 DATA DEFINITION AND MAPPING
+
+7.2 DATABASE CONNECTION INFORMATION
+•	Primary Database Connection Parameters
+•	Backup Database Connection Parameters
+•	Connection Pool Settings
+•	Timeout Configurations
+•	Security Settings
+
+8 INTEGRATION POINTS
+
+8.3 QUEUE MANAGER CONNECTION
+•	Message Queue Configuration
+•	Queue Processing Parameters
+•	Error Handling Procedures
+•	Retry Mechanisms
+•	Monitoring Settings
+
+8.4 WEB SERVICES
+•	REST API Endpoints
+•	SOAP Service Definitions
+•	Authentication Methods
+•	Rate Limiting
+•	Version Control
+
+9 ERROR HANDLING
+•	Graceful degradation procedures
+•	Error message standards
+•	Recovery procedures
+•	User notification process
+•	Logging requirements
+•	Error tracking and reporting
+
+10 UNIT TEST CONDITIONS
+
+10.1 POSITIVE TEST CONDITIONS
+•	Normal operation scenarios
+•	Data validation tests
+•	Performance benchmarks
+•	Integration tests
+•	Security validation
+•	User access verification
+
+10.2 NEGATIVE TEST CONDITIONS
+•	Network failure scenarios
+•	Data corruption tests
+•	Invalid input handling
+•	Concurrent access conflicts
+•	Resource exhaustion tests
+•	Security breach attempts
+
+System Modes
+
+Blue Sky Mode
+•	Default operational state
+•	Start date and time fields remain blank
+•	Displays normal operational metrics
+
+Storm Mode
+•	Activated during outage events
+•	Requires date and time entry
+•	Displays enhanced metrics and storm-specific information
+
+Key Metrics and Calculations
+
+Customer Impact Metrics
+
+Total Customers Affected
+•	Calculates total customers impacted during an event (active + restored)
+•	Multiple outages for the same customer are counted separately
+•	Excludes ASO, ASP, and CSO calls from calculations
+
+Current Customers Out
+•	Shows active customers currently affected by outages
+•	Excludes partially restored customers
+•	Uses start and end times for accurate customer counting
+
+Estimated Time of Restoration (ETR)
+•	Displays published ETR from external outage map
+•	Shows company, region, and municipal level information
+•	Only displays when ETR is populated and Override flag is positive/yes
+
+Hardest Hit Areas
+Displays top 4 affected areas based on selected filters:
+
+1.	Area 1: Highest customer impact
+2.	Area 2: Second highest customer impact
+3.	Area 3: Third highest customer impact
+4.	Area 4: Fourth highest customer impact
+
+Each area displays:
+•	Location name (area, borough, or municipality)
+•	Total customers out
+
+Work Plan Statistics
+
+Customers in Work Plan
+•	Sum of customers associated with ARR, DSP, or ASN events
+•	Includes single customer jobs that are DSP or ARR
+•	Updates dynamically as customers are restored
+•	Drillable for detailed information
+
+Critical Customers in Work Plan
+•	Sum of critical customers in active work plans
+•	Includes critical single customer jobs
+•	Updates with restoration progress
+•	Drillable for detailed information
+
+LSE Customers in Work Plan
+•	Sum of LSE customers in active work plans
+•	Includes LSE single customer jobs
+•	Updates with restoration progress
+•	Drillable for detailed information
+
+Single Customer Jobs
+•	Count of jobs with customer count = 1
+•	Must be in DSP or ARR status
+•	Drillable for detailed information
+
+Resource Management
+
+Crew Information
+•	Number of Crews: Sum of crews dispatched or assigned to events
+•	Number of FTEs: Sum of crew sizes for dispatched or assigned crews
+•	Number of Feeders Working: Count of unique feeders in work plan
+
+Data Integration
+The dashboard integrates with multiple data sources:
+•	External outage map
+•	Work management system
+•	Customer information system
+•	Crew management system
+
+Technical Requirements
+
+Data Refresh
+•	Real-time updates for critical metrics
+•	Periodic updates for non-critical information
+•	Configurable refresh intervals
+
+Drill-Down Capability
+•	Available for most metrics
+•	Provides detailed view of underlying data
+•	Supports filtering and sorting
+
+Filtering Capabilities
+•	Geographic filtering (Region, Borough, Municipality)
+•	Time-based filtering
+•	Event type filtering
+•	Status-based filtering
+
+Security and Access Control
+•	Role-based access control
+•	Secure data transmission
+•	Audit logging for all operations
+
+Performance Requirements
+•	Sub-second response time for critical metrics
+•	Support for concurrent users
+•	Scalable architecture for data processing
+
+Integration Points
+1.	External Outage Map
+2.	Work Management System
+3.	Customer Information System
+4.	Crew Management System
+5.	Geographic Information System
+
+Error Handling
+•	Graceful degradation during system issues
+•	Clear error messaging
+•	Automatic recovery procedures
+•	Data validation and integrity checks
+
+Maintenance and Support
+•	Regular system updates
+•	Backup and recovery procedures
+•	Performance monitoring
+•	User support procedures 
